@@ -33,8 +33,9 @@ import com.djrapitops.plugin.logging.L;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
+import java.io.*;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -128,8 +129,7 @@ public class ServerServerInfo extends ServerInfo {
         server = foundServer.get();
 
         // Update information
-        String name = config.get(PluginSettings.SERVER_NAME);
-        server.setName("plan".equalsIgnoreCase(name) ? "Server " + server.getId() : name);
+        server.setName(getCorrectServerName());
 
         addresses.getAccessAddress().ifPresent(server::setWebAddress);
 
@@ -164,8 +164,35 @@ public class ServerServerInfo extends ServerInfo {
 
     private Server createServerObject(UUID serverUUID) {
         String webAddress = addresses.getAccessAddress().orElse(addresses.getFallbackLocalhostAddress());
-        String name = config.get(PluginSettings.SERVER_NAME);
+        String name = getCorrectServerName();
         int maxPlayers = serverProperties.getMaxPlayers();
         return new Server(-1, serverUUID, name, webAddress, maxPlayers);
+    }
+
+    private String getLocalServerName() {
+        if(server == null) {
+            return "";
+        }
+
+        String serverName = "Server " + server.getId();
+        try {
+            File file = new File("server.properties");
+            BufferedReader read = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = read.readLine()) != null) {
+                if(line.startsWith("server-name=")) {
+                    serverName = line.split("=")[1];
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return serverName;
+    }
+
+    private String getCorrectServerName() {
+        String name = config.get(PluginSettings.SERVER_NAME);
+        return "plan".equalsIgnoreCase(name) ? getLocalServerName() : name;
     }
 }

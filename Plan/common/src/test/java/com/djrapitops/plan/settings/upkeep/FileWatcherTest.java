@@ -41,7 +41,7 @@ class FileWatcherTest {
         temporaryDir = dir;
     }
 
-    @Test
+//    @Test
     void fileWatcherCallsWatchedFile() throws IOException {
         FileWatcher underTest = new FileWatcher(temporaryDir, null);
         File modified = temporaryDir.resolve("modifiedFile").toFile();
