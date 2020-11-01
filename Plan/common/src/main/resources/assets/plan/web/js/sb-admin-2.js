@@ -53,7 +53,7 @@ window.addEventListener('hashchange', openPage);
 
 //Sidebar navigation tabs
 $('#accordionSidebar .nav-item a').click(event => {
-    if(history.replaceState) {
+    if (history.replaceState && event.currentTarget.href.split('#')[1].length > 0) {
         event.preventDefault();
         history.replaceState(undefined, undefined, '#' + event.currentTarget.href.split('#')[1]);
         openPage();
@@ -66,7 +66,7 @@ $('.nav-tabs a.nav-link').click(event => {
     if (!uriHash) return;
     const currentTab = uriHash[0];
     const originalTargetId = event.currentTarget.href.split('#')[1];
-    if(history.replaceState) {
+    if (history.replaceState) {
         event.preventDefault();
         history.replaceState(undefined, undefined, currentTab + '&' + originalTargetId);
         openPage();
@@ -112,18 +112,3 @@ function toggleSidebar() {
 }
 
 $('.sidebar-toggler,.sidebar-close-modal').on('click', toggleSidebar);
-
-// Scroll to top button appear
-$(document).on('scroll', () => {
-    const scrollDistance = $(this).scrollTop();
-    if (scrollDistance > 100) {
-        $('.scroll-to-top').fadeIn();
-    } else {
-        $('.scroll-to-top').fadeOut();
-    }
-});
-
-$('.scroll-to-top').on('click', 'a.scroll-to-top', event => {
-    window.scrollTo(0, 0); // Scroll to top
-    event.preventDefault();
-});
