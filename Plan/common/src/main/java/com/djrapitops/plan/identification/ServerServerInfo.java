@@ -28,9 +28,10 @@ import com.djrapitops.plan.settings.config.paths.PluginSettings;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -76,7 +77,7 @@ public class ServerServerInfo extends ServerInfo {
 
     private void updateStorage() {
         String address = addresses.getAccessAddress().orElseGet(addresses::getFallbackLocalhostAddress);
-        String name = config.get(PluginSettings.SERVER_NAME);
+        String name = getCorrectServerName();
 
         server.setName(name);
         server.setWebAddress(address);
