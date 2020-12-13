@@ -16,14 +16,19 @@
  */
 package com.djrapitops.plan.commands.use;
 
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.text.TextStringBuilder;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 class BukkitPartBuilder implements MessageBuilder {
 
@@ -44,8 +49,11 @@ class BukkitPartBuilder implements MessageBuilder {
     @Override
     public MessageBuilder addPart(String text) {
         BukkitPartBuilder nextPart = new BukkitPartBuilder(this);
-        // appendLegacy cannot be used as it was added after 1.8
-        nextPart.part.append(TextComponent.fromLegacyText(text));
+        try {
+            nextPart.part.appendLegacy(text);
+        } catch (NoSuchMethodError oldVersion) { // not supported in 1.8
+            nextPart.part.append(ChatColor.translateAlternateColorCodes('§', text));
+        }
         return nextPart;
     }
 
@@ -105,8 +113,33 @@ class BukkitPartBuilder implements MessageBuilder {
         if (sender != null) {
             sender.sender.spigot().sendMessage(part.create());
         } else if (previous != null) {
-            previous.part.append(part.create());
+            try {
+                previous.part.append(part.create());
+            } catch (NoSuchMethodError oldVersion) { // not supported in 1.8
+                sendOld();
+                return;
+            }
             previous.send();
+        }
+    }
+
+    // Compatibility for 1.8
+    private void sendOld() {
+        List<BaseComponent> components = new ArrayList<>();
+
+        // Jumping through a bunch of hoops to implement recursive append function dynamically
+        BukkitPartBuilder current = this;
+        while (current.sender == null) {
+            components.addAll(0, Arrays.asList(current.part.create()));
+            current = current.previous;
+        }
+
+        // CommandSender#spigot#sendMessage(BaseComponent[]) is not supported on 1.8
+        CommandSender commandSender = current.sender.sender;
+        if (commandSender instanceof Player) {
+            ((Player) commandSender).spigot().sendMessage(components.toArray(new BaseComponent[0]));
+        } else {
+            commandSender.sendMessage(BaseComponent.toLegacyText(components.toArray(new BaseComponent[0])));
         }
     }
 }

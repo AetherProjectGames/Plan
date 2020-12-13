@@ -16,6 +16,9 @@
  */
 package com.djrapitops.plan.delivery.rendering.html;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static com.djrapitops.plan.delivery.rendering.html.Contributors.For.CODE;
 import static com.djrapitops.plan.delivery.rendering.html.Contributors.For.LANG;
 
@@ -50,6 +53,7 @@ public class Contributors {
                 new Contributor("f0rb1d (\u4f5b\u58c1\u706f)", LANG),
                 new Contributor("Fur_xia", LANG),
                 new Contributor("fuzzlemann", CODE, LANG),
+                new Contributor("Guinness_Akihiko", LANG),
                 new Contributor("hallo1142", LANG),
                 new Contributor("itaquito", LANG),
                 new Contributor("jyhsu2000", CODE),
@@ -109,6 +113,22 @@ public class Contributors {
                 html.append(contribution.toHtml());
             }
             html.append("</li>");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Contributor that = (Contributor) o;
+            return name.equals(that.name) &&
+                    Arrays.equals(contributed, that.contributed);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(name);
+            result = 31 * result + Arrays.hashCode(contributed);
+            return result;
         }
 
         @Override
